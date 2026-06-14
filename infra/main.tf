@@ -26,3 +26,18 @@ module "foundry" {
   location = azurerm_resource_group.sdr-systems.location
 
 }
+
+module "network" {
+  source = "./modules/network"
+  resource_group_name = azurerm_resource_group.sdr-systems.name
+  location = var.location
+  private_connection_resource_id = module.foundry.private_connection_resource_id
+  custom_subdomain_name = module.foundry.custom_subdomain_name 
+}
+
+#module "acr" {
+  #source = "./modules/acr"
+  #resource_group_name = azurerm_resource_group.sdr-systems.name
+  #location = azurerm_resource_group.sdr-systems.location
+
+#}
