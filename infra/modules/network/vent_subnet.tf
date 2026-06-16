@@ -19,12 +19,12 @@ resource "azurerm_subnet" "sdr_container_subnet" {
   virtual_network_name = azurerm_virtual_network.sdr_vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 
-   delegation {
-    name = "sdr-container-app-delegation"
+  delegation {
+    name = "container-sdr-delegation"
     service_delegation {
-      name    = "Microsoft.App/environments"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    name    = "Microsoft.App/environments"
+    actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
     }
-   }
+  }
 
 }
