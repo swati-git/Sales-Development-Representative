@@ -43,7 +43,7 @@ module "aca" {
   azure_ai_model_deployment_name = module.foundry.azure_ai_model_deployment_name
   sdr_container_subnet_id        = module.network.sdr_container_subnet_id
   cognitive_account_id           = module.foundry.azurerm_cognitive_account_id
-
+  image_tag                      = var.image_tag
 }
 
 #module "acr" {

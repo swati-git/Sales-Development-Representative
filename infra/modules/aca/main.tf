@@ -51,7 +51,7 @@ resource "azurerm_container_app" "sdr_container_app" {
   template {
     container {
       name   = "agent-server"
-      image  = "${azurerm_container_registry.sdr_container_registry.login_server}/sdr-agent:latest"
+      image  = "${azurerm_container_registry.sdr_container_registry.login_server}/sdr-agent:${var.image_tag}"
       cpu    = 0.5
       memory = "1Gi"
 
@@ -65,7 +65,11 @@ resource "azurerm_container_app" "sdr_container_app" {
         value = var.azure_ai_model_deployment_name
       }
     }
+    min_replicas = 1
+    max_replicas = 3
   }
+
+
 
   ingress {
     external_enabled = false

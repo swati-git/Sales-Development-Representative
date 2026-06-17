@@ -27,5 +27,9 @@ variable "cognitive_account_id" {
     type = string
     }
 
+variable "image_tag" {
+  type = string
+  default = "dummy"
+}
 
     
