@@ -64,6 +64,11 @@ resource "azurerm_container_app" "sdr_container_app" {
         name  = "AZURE_AI_MODEL_DEPLOYMENT_NAME"
         value = var.azure_ai_model_deployment_name
       }
+
+      env {
+      name  = "AZURE_CLIENT_ID"
+      value = azurerm_user_assigned_identity.agent.client_id
+    }
     }
     min_replicas = 1
     max_replicas = 3
