@@ -19,7 +19,7 @@ from typing import Annotated
 from agent_framework import Agent, tool
 from agent_framework.foundry import FoundryChatClient
 from agent_framework_foundry_hosting import ResponsesHostServer
-from azure.identity import AzureCliCredential
+from azure.identity import AzureCliCredential, DefaultAzureCredential
 
 #
 
@@ -136,11 +136,11 @@ Then reply with: the verdict, the score and tier, the top 2-3 reasons, and one
 suggested next action for the AE. Be concise and specific."""
 
 
-def build_agent() -> Agent:
+def build_qualification_agent() -> Agent:
     client = FoundryChatClient(
         project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
         model=os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"],
-        credential=AzureCliCredential(),
+        credential=DefaultAzureCredential(),
     )
     return Agent(
         client=client,
@@ -150,5 +150,5 @@ def build_agent() -> Agent:
 
 
 if __name__ == "__main__":
-    server = ResponsesHostServer(build_agent())
+    server = ResponsesHostServer(build_qualification_agent())
     server.run()
