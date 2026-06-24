@@ -41,9 +41,9 @@ def get_lead(
         "company": "Acme Logistics",
         "title": "VP of Operations",
         "company_domain": "acme-logistics.com",
-        "employee_count": None,   # missing -> agent should enrich
-        "industry": None,         # missing -> agent should enrich
-        "annual_revenue": None,   # missing -> agent should enrich
+        "employee_count": None,   
+        "industry": None,         
+        "annual_revenue": None,
         "lead_source": "Webinar: Q2 Supply Chain Trends",
     }
 
@@ -136,19 +136,9 @@ Then reply with: the verdict, the score and tier, the top 2-3 reasons, and one
 suggested next action for the AE. Be concise and specific."""
 
 
-def build_qualification_agent() -> Agent:
-    client = FoundryChatClient(
-        project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
-        model=os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"],
-        credential=DefaultAzureCredential(),
-    )
+def build_qualification_agent(client: FoundryChatClient) -> Agent:
     return Agent(
         client=client,
         instructions=INSTRUCTIONS,
         tools=[get_lead, enrich_contact, compute_icp_fit, update_lead_qualification],
     )
-
-
-if __name__ == "__main__":
-    server = ResponsesHostServer(build_qualification_agent())
-    server.run()

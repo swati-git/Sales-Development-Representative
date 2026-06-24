@@ -1,0 +1,61 @@
+To create a server , that runs continuously to accept requests, use container_app not container_app_job.
+The structural shape is familiar — identity, registry, and template blocks work the same way, and the registry/image wiring is identical. What changes is the parts that make it a daemon instead of a run-to-completion task:
+
+ingress block — this is the big one. 
+--It provisions the Envoy reverse proxy in front of your container, terminates TLS, 
+--and routes external HTTP to target_port (your uvicorn port, commonly 8000). A Job has no equivalent because it doesn't serve requests.
+min_replicas = 1 — guarantees at least one replica stays running continuously. 
+--That's the "never exits" behavior FastAPI needs. (Set it to 0 if you want scale-to-zero, but then you accept cold starts.)
+--No trigger / no timeout / no completion count — there's nothing to "complete."
+--The container is expected to stay up; if uvicorn exits, the platform treats that as a crash and restarts the replica, rather than recording success.
+--After deploy, your app is reachable at the FQDN exposed as azurerm_container_app.fastapi.latest_revision_fqdn (or ingress[0].fqdn).
+--Use the Job only if the image's job is to do something and stop — e.g. a FastAPI-based CLI/script run, or a batch task that happens to share the codebase but exits when finished. 
+For "responds to requests," it's a Container App.
+
+resource "azurerm_container_app" "fastapi" {
+  name                         = "fastapi-app"
+  resource_group_name          = azurerm_resource_group.this.name
+  container_app_environment_id = azurerm_container_app_environment.this.id
+  revision_mode                = "Single"
+
+  # Attach the managed identity used to pull from ACR
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.this.id]
+  }
+
+  # Auth/pull config — points at the registry, same role as in the Job
+  registry {
+    server   = azurerm_container_registry.this.login_server
+    identity = azurerm_user_assigned_identity.this.id
+  }
+
+  # Envoy ingress — this is what makes it a request-serving daemon
+  ingress {
+    external_enabled = true          # public; false = internal-only
+    target_port      = 8000          # the port uvicorn listens on
+    transport        = "auto"
+
+    traffic_weight {
+      latest_revision = true
+      percentage      = 100
+    }
+  }
+
+  template {
+    min_replicas = 1                 # keep at least 1 up = stays alive
+    max_replicas = 5                 # scales out under load
+
+    container {
+      name   = "fastapi"
+      image  = "${azurerm_container_registry.this.login_server}/myapp:latest"
+      cpu    = 0.5
+      memory = "1Gi"
+
+      env {
+        name  = "ENVIRONMENT"
+        value = "production"
+      }
+    }
+  }
+}
