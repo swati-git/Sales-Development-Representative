@@ -13,7 +13,7 @@ resource "azurerm_cognitive_account" "sdr_account" {
   custom_subdomain_name =  "sdr-system"
 
   public_network_access_enabled = false
-
+  
 } 
 
 resource "azurerm_cognitive_account_project" "sdr_project" {
@@ -45,10 +45,3 @@ resource "azurerm_cognitive_deployment" "sdr_deployment" {
     capacity = 20
   }
 }
-
-#resource "azurerm_role_assignemnt" "sdr_project_manager" {
-  #scope = azurerm_cognitive_account_project.sdr_project.id
-  #principal_id         = azurerm_container_app_job.<>.identity[0].principal_id ???
-  #role_definition_name = "Foundry Project Manager"
-
-#}
